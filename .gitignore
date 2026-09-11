@@ -1,0 +1,57 @@
+# Environments
+.env
+venv/
+env/
+.venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing
+.pytest_cache/
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Local media / test files
+*.jpg
+*.jpeg
+*.png
+*.mp3
+*.wav
+*.ogg
+*.mp4
+media/
+uploads/
+test_files/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
