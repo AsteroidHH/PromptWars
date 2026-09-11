@@ -24,7 +24,7 @@ def serve_frontend():
 
 @app.post("/triage", response_model=SanjeevaniTriageResponse)
 async def triage_endpoint(
-    text_input: str = Form(..., description="Text description of the emergency"),
+    text_input: Optional[str] = Form(None, description="Text description of the emergency"),
     media: Optional[UploadFile] = File(None, description="Optional image or audio file of the scene")
 ):
     """

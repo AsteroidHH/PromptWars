@@ -81,8 +81,8 @@
                 <form id="triageForm" onsubmit="return false;" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col gap-5">
                     
                     <div>
-                        <label for="textInput" class="block text-sm font-bold text-slate-900 dark:text-slate-200 mb-2">Emergency Description / Notes</label>
-                        <textarea id="textInput" rows="5" class="w-full bg-slate-50 text-slate-900 border-slate-300 placeholder-slate-400 dark:bg-slate-800 dark:text-white dark:border-slate-700 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-3 transition-all" placeholder="Describe the situation, injuries, and location..."></textarea>
+                        <label for="emergencyText" class="block text-sm font-bold text-slate-900 dark:text-slate-200 mb-2">Emergency Description / Notes</label>
+                        <textarea id="emergencyText" rows="5" class="w-full bg-slate-50 text-slate-900 border-slate-300 placeholder-slate-400 dark:bg-slate-800 dark:text-white dark:border-slate-700 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-3 transition-all" placeholder="Describe the situation, injuries, and location..."></textarea>
                     </div>
 
                     <!-- Media Uploads (Photo/Camera) -->
@@ -151,7 +151,7 @@
             </div>
 
             <!-- Right Column: Results & Action Center -->
-            <div id="resultsArea" class="hidden flex flex-col gap-6">
+            <div id="resultsContainer" class="hidden flex flex-col gap-6">
                 <!-- Triage Header Card -->
                 <div id="triageCard" class="rounded-xl border p-6 shadow-2xl transition-all duration-500">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
@@ -273,7 +273,7 @@
 
         // Elements
         const form = document.getElementById('triageForm');
-        const textInput = document.getElementById('textInput');
+        const textInput = document.getElementById('emergencyText');
         const fileInput = document.getElementById('fileInput');
         const cameraInput = document.getElementById('cameraInput');
         
@@ -294,7 +294,7 @@
         
         
         
-        const resultsArea = document.getElementById('resultsArea');
+        const resultsContainer = document.getElementById('resultsContainer');
         const emptyState = document.getElementById('emptyState');
         const resetBtn = document.getElementById('resetBtn');
 
@@ -497,8 +497,16 @@
         async function handleTriageSubmit() {
             safeAddClass(validationAlert, 'hidden');
             
+            const textValue = document.getElementById('emergencyText').value.trim();
+            let selectedMediaFile = null;
+            if (recordedAudioBlob) {
+                selectedMediaFile = new File([recordedAudioBlob], 'voicememo.webm', {type: recordedAudioBlob.type});
+            } else if (photoFile) {
+                selectedMediaFile = photoFile;
+            }
+            
             // Validation
-            if (!textInput.value.trim() && !recordedAudioBlob && !photoFile) {
+            if (!textValue && !selectedMediaFile) {
                 validationAlert.classList.remove('hidden');
                 return;
             }
@@ -507,41 +515,42 @@
             const analyzeBtn = document.getElementById('analyzeBtn');
             analyzeBtn.disabled = true;
             safeAddClass(analyzeBtn, 'opacity-70', 'cursor-not-allowed');
-            document.getElementById('analyzeBtnContent').innerHTML = '<span class="animate-spin mr-2">⏳</span> Analyzing Emergency...';
-            safeAddClass(emptyState, 'hidden');
-            safeAddClass(resultsArea, 'hidden');
+            analyzeBtn.innerHTML = '⏳ Analyzing...';
+            
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('resultsContainer').classList.add('hidden');
 
             const formData = new FormData();
-            if (textInput.value.trim()) formData.append('text_input', textInput.value.trim());
-            else formData.append('text_input', 'Please analyze the provided media.');
-
-            if (recordedAudioBlob) {
-                formData.append('media', recordedAudioBlob, 'voicememo.webm');
-            } else if (photoFile) {
-                formData.append('media', photoFile);
-            }
+            if (textValue) formData.append('text_input', textValue);
+            if (selectedMediaFile) formData.append('media', selectedMediaFile);
+            
+            console.log("Submitting triage payload:", textValue);
 
             try {
                 const response = await fetch('/triage', { method: 'POST', body: formData });
-                if (!response.ok) throw new Error((await response.json()).detail || 'Triage failed');
-                displayResults(await response.json());
-            } catch (err) {
-                alert('Error processing triage: ' + err.message);
-                emptyState.classList.remove('hidden');
+                console.log("Triage response status:", response.status);
                 
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.detail || 'Triage failed with status ' + response.status);
+                }
+                
+                const data = await response.json();
+                console.log("Triage data received:", data);
+                displayResults(data);
+            } catch (err) {
                 // Show a visible alert box if error happens
+                document.getElementById('emptyState').classList.remove('hidden');
                 const alertHtml = document.createElement('div');
                 alertHtml.className = 'mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg font-medium';
                 alertHtml.textContent = 'Error processing triage: ' + err.message;
                 const form = document.getElementById('triageForm');
                 form.appendChild(alertHtml);
                 setTimeout(() => alertHtml.remove(), 5000);
-
             } finally {
-                const analyzeBtn = document.getElementById('analyzeBtn');
                 analyzeBtn.disabled = false;
                 analyzeBtn.classList.remove('opacity-70', 'cursor-not-allowed');
-                document.getElementById('analyzeBtnContent').textContent = 'Analyze Emergency';
+                analyzeBtn.innerHTML = 'Analyze Emergency';
             }
         }
 
@@ -563,7 +572,8 @@
         }
 
         function displayResults(data) {
-            resultsArea.classList.remove('hidden');
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('resultsContainer').classList.remove('hidden');
             
             // Triage Card Styling
             const card = document.getElementById('triageCard');
@@ -666,7 +676,7 @@
 
             // UI State
             form.style.display = 'flex';
-            safeAddClass(resultsArea, 'hidden');
+            safeAddClass(resultsContainer, 'hidden');
             emptyState.classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });

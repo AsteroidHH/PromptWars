@@ -1,10 +1,10 @@
 import os
-import pytest
-from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
 
+# Set dummy key BEFORE any app imports so that Gemini Client initialization doesn't fail during test collection
 os.environ["GEMINI_API_KEY"] = "dummy_test_key"
 
+from fastapi.testclient import TestClient
+from unittest.mock import patch
 from app.main import app
 from app.schemas import (
     SanjeevaniTriageResponse, 
