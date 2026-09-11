@@ -47,7 +47,9 @@ def test_static_root():
     response = client.get("/")
     assert response.status_code == 200
     assert "text/html" in response.headers["content-type"]
-    assert "Sanjeevani | Emergency Triage AI" in response.text
+    assert 'id="emergencyText"' in response.text
+    assert 'id="analyzeBtn"' in response.text
+    assert 'id="resultsContainer"' in response.text
 
 
 @patch("app.main.analyze_emergency")
@@ -82,3 +84,19 @@ def test_triage_endpoint_with_invalid_media(mock_analyze):
     assert response.status_code == 400
     assert "Unsupported media type" in response.json()["detail"]
     mock_analyze.assert_not_called()
+
+
+@patch("app.main.analyze_emergency")
+def test_end_to_end_integration(mock_analyze):
+    mock_analyze.return_value = mock_triage_response()
+    
+    response = client.post(
+        "/triage",
+        data={"text_input": "Full stack integration test text"}
+    )
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert "triage_tag" in data
+    assert "bystander_actions" in data
+    assert "google_maps_emergency_url" in data

@@ -1,6 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from typing import Optional
 import urllib.parse
 import os
@@ -60,7 +60,7 @@ async def triage_endpoint(
             
         return triage_result
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Triage processing failed: {str(e)}")
+        return JSONResponse(status_code=500, content={"detail": str(e)})
 
 @app.get("/health")
 def health_check():
