@@ -1,7 +1,13 @@
 import os
+import time
+import logging
 from google import genai
 from google.genai import types
+from google.genai import errors
 from .schemas import SanjeevaniTriageResponse
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Initialize the Gemini client
 # The client automatically picks up GEMINI_API_KEY from the environment
@@ -15,6 +21,7 @@ def analyze_emergency(
     """
     Analyzes emergency inputs (text + optional media) using Gemini
     and returns a structured SanjeevaniTriageResponse.
+    Includes multi-model fallback and retry logic for high demand (503s).
     """
     
     # Base prompt to instruct the model on its persona and task
@@ -43,10 +50,43 @@ def analyze_emergency(
         temperature=0.2, # Low temperature for more deterministic triage
     )
     
-    response = client.models.generate_content(
-        model="gemini-3.7-flash",
-        contents=contents,
-        config=config
-    )
+    # Fallback list of modern models to handle high demand
+    models_to_try = [
+        "gemini-3.7-flash",        # Primary fast multimodal model
+        "gemini-3.5-flash-lite",   # Fallback 1: High-throughput lite model
+        "gemini-3.1-pro-preview"   # Fallback 2: Pro model
+    ]
     
-    return response.parsed
+    last_error = None
+    
+    for i, model in enumerate(models_to_try):
+        try:
+            logger.info(f"Attempting inference with model: {model}")
+            response = client.models.generate_content(
+                model=model,
+                contents=contents,
+                config=config
+            )
+            return response.parsed
+            
+        except errors.APIError as e:
+            last_error = e
+            # Log the error and backoff before trying the next model
+            logger.warning(f"Model {model} failed with APIError: {e.message}. HTTP Code: {e.code}")
+            if i < len(models_to_try) - 1:
+                logger.info(f"Retrying in 2 seconds with next fallback model...")
+                time.sleep(2)
+            else:
+                logger.error("All fallback models exhausted.")
+                
+        except Exception as e:
+            last_error = e
+            logger.warning(f"Model {model} encountered an unexpected error: {str(e)}")
+            if i < len(models_to_try) - 1:
+                logger.info(f"Retrying in 2 seconds with next fallback model...")
+                time.sleep(2)
+            else:
+                logger.error("All fallback models exhausted.")
+                
+    # If we exhaust all models, raise the last exception
+    raise last_error
