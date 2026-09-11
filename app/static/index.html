@@ -263,7 +263,7 @@
         function safeAddClass(element, ...classNames) {
             classNames.forEach(c => {
                 if (typeof c === 'string') {
-                    c.split(/\s+/).filter(Boolean).forEach(cls => safeAddClass(element, cls));
+                    c.split(/\s+/).filter(Boolean).forEach(cls => element.classList.add(cls));
                 }
             });
         }
