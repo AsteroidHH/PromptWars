@@ -35,7 +35,7 @@ def mock_triage_response():
             suspected_injuries=["Laceration on right leg."],
             recommended_trauma_level="Level 1 Trauma Center"
         ),
-        google_maps_emergency_url="https://www.google.com/maps/search/trauma+center+emergency+hospital/@?api=1&query=Main%20St%20and%204th%20Ave"
+        google_maps_emergency_url="https://www.google.com/maps/search/?api=1&query=emergency+trauma+center+hospital+near+Main%20St%20and%204th%20Ave"
     )
 
 def test_health_check():
@@ -47,7 +47,7 @@ def test_static_root():
     response = client.get("/")
     assert response.status_code == 200
     assert "text/html" in response.headers["content-type"]
-    assert "Sanjeevani Triage" in response.text
+    assert "Sanjeevani | Emergency Triage AI" in response.text
 
 
 @patch("app.main.analyze_emergency")

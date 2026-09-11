@@ -57,7 +57,9 @@ async def triage_endpoint(
         # Enhance response with Google Maps routing
         if triage_result.extracted_location:
             encoded_location = urllib.parse.quote(triage_result.extracted_location)
-            triage_result.google_maps_emergency_url = f"https://www.google.com/maps/search/trauma+center+emergency+hospital/@?api=1&query={encoded_location}"
+            triage_result.google_maps_emergency_url = f"https://www.google.com/maps/search/?api=1&query=emergency+trauma+center+hospital+near+{encoded_location}"
+        else:
+            triage_result.google_maps_emergency_url = "https://www.google.com/maps/search/?api=1&query=nearest+emergency+trauma+center+hospital"
             
         return triage_result
     except Exception as e:
