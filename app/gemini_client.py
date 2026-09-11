@@ -1,27 +1,45 @@
-import os
 import time
 import logging
+from typing import Optional
+
 from google import genai
 from google.genai import types
 from google.genai import errors
+
 from .schemas import SanjeevaniTriageResponse
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("sanjeevani")
 
-# Initialize the Gemini client
-# The client automatically picks up GEMINI_API_KEY from the environment
-client = genai.Client()
+# Singleton client pattern for connection pooling
+_client: Optional[genai.Client] = None
+
+def get_client() -> genai.Client:
+    """
+    Returns a singleton genai.Client instance for connection pooling.
+    Automatically picks up GEMINI_API_KEY from the environment.
+    """
+    global _client
+    if _client is None:
+        _client = genai.Client()
+    return _client
 
 def analyze_emergency(
-    text_input: str,
-    media_bytes: bytes = None,
-    media_mime_type: str = None
+    text_input: Optional[str],
+    media_bytes: Optional[bytes] = None,
+    media_mime_type: Optional[str] = None
 ) -> SanjeevaniTriageResponse:
     """
     Analyzes emergency inputs (text + optional media) using Gemini
     and returns a structured SanjeevaniTriageResponse.
     Includes multi-model fallback and retry logic for high demand (503s).
+    
+    Args:
+        text_input: The text description of the emergency (can be None if media-only).
+        media_bytes: Raw bytes of the uploaded media file (image/audio).
+        media_mime_type: MIME type of the uploaded media.
+        
+    Returns:
+        SanjeevaniTriageResponse: Parsed structured response object.
     """
     
     # Base prompt to instruct the model on its persona and task
@@ -36,7 +54,7 @@ def analyze_emergency(
     
     contents = [
         types.Part.from_text(text=system_prompt),
-        types.Part.from_text(text=f"Emergency Input: {text_input}")
+        types.Part.from_text(text=f"Emergency Input: {text_input or 'Please analyze the attached media.'}")
     ]
     
     if media_bytes and media_mime_type:
@@ -48,6 +66,7 @@ def analyze_emergency(
         response_mime_type="application/json",
         response_schema=SanjeevaniTriageResponse,
         temperature=0.2, # Low temperature for more deterministic triage
+        max_output_tokens=2048, # Fast inference cutoff
     )
     
     # Fallback list of modern models to handle high demand
@@ -58,6 +77,7 @@ def analyze_emergency(
     ]
     
     last_error = None
+    client = get_client()
     
     for i, model in enumerate(models_to_try):
         try:
@@ -74,7 +94,7 @@ def analyze_emergency(
             # Log the error and backoff before trying the next model
             logger.warning(f"Model {model} failed with APIError: {e.message}. HTTP Code: {e.code}")
             if i < len(models_to_try) - 1:
-                logger.info(f"Retrying in 2 seconds with next fallback model...")
+                logger.info("Retrying in 2 seconds with next fallback model...")
                 time.sleep(2)
             else:
                 logger.error("All fallback models exhausted.")
@@ -83,7 +103,7 @@ def analyze_emergency(
             last_error = e
             logger.warning(f"Model {model} encountered an unexpected error: {str(e)}")
             if i < len(models_to_try) - 1:
-                logger.info(f"Retrying in 2 seconds with next fallback model...")
+                logger.info("Retrying in 2 seconds with next fallback model...")
                 time.sleep(2)
             else:
                 logger.error("All fallback models exhausted.")

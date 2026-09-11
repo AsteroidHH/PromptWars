@@ -1,12 +1,18 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse
-from typing import Optional
-import urllib.parse
+import logging
 import os
+import urllib.parse
+from typing import Optional, Union
+
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from .schemas import SanjeevaniTriageResponse
 from .gemini_client import analyze_emergency
+
+# Standardize Python Logging
+logger = logging.getLogger("sanjeevani")
 
 app = FastAPI(
     title="Sanjeevani Triage API",
@@ -14,23 +20,36 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Network Compression
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
 # Ensure static directory exists
 os.makedirs("app/static", exist_ok=True)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 @app.get("/")
-def serve_frontend():
+def serve_frontend() -> FileResponse:
+    """
+    Serves the root HTML frontend for the Sanjeevani Triage application.
+    """
     return FileResponse("app/static/index.html")
 
 @app.post("/triage", response_model=SanjeevaniTriageResponse)
 async def triage_endpoint(
     text_input: Optional[str] = Form(None, description="Text description of the emergency"),
     media: Optional[UploadFile] = File(None, description="Optional image or audio file of the scene")
-):
+) -> Union[SanjeevaniTriageResponse, JSONResponse]:
     """
     Submit an emergency situation for immediate triage.
     Accepts text and an optional media file (image/audio).
     Returns a verified, structured action plan with Google Maps routing.
+    
+    Args:
+        text_input: Textual emergency description from the user.
+        media: Optional UploadFile containing photo or audio recording.
+        
+    Returns:
+        SanjeevaniTriageResponse or JSONResponse containing error details.
     """
     media_bytes = None
     media_mime_type = None
@@ -40,7 +59,7 @@ async def triage_endpoint(
         media_mime_type = media.content_type
         
         # Robust validation for allowed mime types
-        if not (media_mime_type.startswith("image/") or media_mime_type.startswith("audio/") or media_mime_type in ["video/webm", "video/mp4"]):
+        if media_mime_type and not (media_mime_type.startswith("image/") or media_mime_type.startswith("audio/") or media_mime_type in ["video/webm", "video/mp4"]):
             raise HTTPException(status_code=400, detail=f"Unsupported media type: {media_mime_type}. Please upload a valid audio or image file.")
 
     try:
@@ -60,8 +79,12 @@ async def triage_endpoint(
             
         return triage_result
     except Exception as e:
+        logger.error(f"Triage endpoint failed: {str(e)}")
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 @app.get("/health")
-def health_check():
+def health_check() -> dict:
+    """
+    Simple health check endpoint to verify service uptime.
+    """
     return {"status": "healthy", "service": "Sanjeevani Triage"}
