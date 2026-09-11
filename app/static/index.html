@@ -78,11 +78,11 @@
                 </div>
 
                 <!-- Input Form -->
-                <form id="triageForm" onsubmit="return false;" class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 rounded-xl p-6 flex flex-col gap-5 shadow-lg">
+                <form id="triageForm" onsubmit="return false;" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col gap-5">
                     
                     <div>
                         <label for="textInput" class="block text-sm font-bold text-slate-900 dark:text-slate-200 mb-2">Emergency Description / Notes</label>
-                        <textarea id="textInput" rows="5" class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-3 transition-all" placeholder="Describe the situation, injuries, and location..."></textarea>
+                        <textarea id="textInput" rows="5" class="w-full bg-slate-50 text-slate-900 border-slate-300 placeholder-slate-400 dark:bg-slate-800 dark:text-white dark:border-slate-700 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-3 transition-all" placeholder="Describe the situation, injuries, and location..."></textarea>
                     </div>
 
                     <!-- Media Uploads (Photo/Camera) -->
@@ -144,12 +144,8 @@
                         </div>
                     </div>
 
-                    <button type="button" id="submitBtn" class="mt-4 w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-slate-900 dark:text-white rounded-lg p-4 font-bold text-lg transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)] hover:shadow-[0_0_25px_rgba(37,99,235,0.5)]">
-                        <span>Analyze Emergency</span>
-                        <svg id="loadingSpinner" class="animate-spin h-5 w-5 text-slate-900 dark:text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
+                    <button type="button" id="analyzeBtn" class="mt-4 w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-slate-900 dark:text-white rounded-lg p-4 font-bold text-lg transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)] hover:shadow-[0_0_25px_rgba(37,99,235,0.5)]">
+                        <span id="analyzeBtnContent" class="flex items-center">Analyze Emergency</span>
                     </button>
                 </form>
             </div>
@@ -249,7 +245,7 @@
             </div>
             
             <!-- Placeholder for right column before submit -->
-            <div id="emptyState" class="hidden lg:flex flex-col items-center justify-center h-full bg-white/80 dark:glass-card border border-slate-200 dark:border-slate-700 shadow-sm rounded-xl p-10 text-center opacity-50">
+            <div id="emptyState" class="hidden lg:flex flex-col items-center justify-center h-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl text-center">
                 <span class="text-6xl mb-4">🚑</span>
                 <h3 class="text-xl font-bold text-slate-900 dark:text-white font-medium mb-2">Awaiting Emergency Input</h3>
                 <p class="text-slate-500 dark:text-slate-500 max-w-sm">Use the console on the left to submit an emergency via text, audio, or photo. The AI triage results will appear here.</p>
@@ -296,8 +292,8 @@
         const discardAudioBtn = document.getElementById('discardAudioBtn');
         const validationAlert = document.getElementById('validationAlert');
         
-        const submitBtn = document.getElementById('submitBtn');
-        const loadingSpinner = document.getElementById('loadingSpinner');
+        
+        
         const resultsArea = document.getElementById('resultsArea');
         const emptyState = document.getElementById('emptyState');
         const resetBtn = document.getElementById('resetBtn');
@@ -508,9 +504,10 @@
             }
             
             // Loading State
-            submitBtn.disabled = true;
-            safeAddClass(submitBtn, 'opacity-70', 'cursor-not-allowed');
-            loadingSpinner.classList.remove('hidden');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            analyzeBtn.disabled = true;
+            safeAddClass(analyzeBtn, 'opacity-70', 'cursor-not-allowed');
+            document.getElementById('analyzeBtnContent').innerHTML = '<span class="animate-spin mr-2">⏳</span> Analyzing Emergency...';
             safeAddClass(emptyState, 'hidden');
             safeAddClass(resultsArea, 'hidden');
 
@@ -518,9 +515,6 @@
             if (textInput.value.trim()) formData.append('text_input', textInput.value.trim());
             else formData.append('text_input', 'Please analyze the provided media.');
 
-            // Attach Media (Audio gets priority if both exist, though Gemini supports both, our backend expects one `media` file currently)
-            // Wait, the backend accepts `Optional[UploadFile] = File(None)`. If we send multiple, it only takes one. Let's send audio if it exists, else photo.
-            // Actually, backend only accepts one `media` field. 
             if (recordedAudioBlob) {
                 formData.append('media', recordedAudioBlob, 'voicememo.webm');
             } else if (photoFile) {
@@ -534,10 +528,20 @@
             } catch (err) {
                 alert('Error processing triage: ' + err.message);
                 emptyState.classList.remove('hidden');
+                
+                // Show a visible alert box if error happens
+                const alertHtml = document.createElement('div');
+                alertHtml.className = 'mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg font-medium';
+                alertHtml.textContent = 'Error processing triage: ' + err.message;
+                const form = document.getElementById('triageForm');
+                form.appendChild(alertHtml);
+                setTimeout(() => alertHtml.remove(), 5000);
+
             } finally {
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
-                safeAddClass(loadingSpinner, 'hidden');
+                const analyzeBtn = document.getElementById('analyzeBtn');
+                analyzeBtn.disabled = false;
+                analyzeBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+                document.getElementById('analyzeBtnContent').textContent = 'Analyze Emergency';
             }
         }
 
@@ -550,7 +554,7 @@
                 return false;
             });
         }
-        const submitBtnObj = document.getElementById('submitBtn');
+        const submitBtnObj = document.getElementById('analyzeBtn');
         if (submitBtnObj) {
             submitBtnObj.addEventListener('click', (e) => {
                 e.preventDefault();
