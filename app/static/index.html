@@ -21,6 +21,28 @@
     </script>
     <style>
         body { font-family: 'Inter', sans-serif; }
+        
+        /* Explicit Textarea Theme Overrides */
+        /* In Dark Mode (when html has class 'dark') */
+        html.dark #emergencyText {
+            background-color: #1e293b !important; /* slate-800 dark charcoal */
+            color: #ffffff !important;           /* crisp white text */
+            border-color: #334155 !important;    /* slate-700 border */
+        }
+        html.dark #emergencyText::placeholder {
+            color: #94a3b8 !important;           /* slate-400 placeholder */
+        }
+
+        /* In Light Mode (when html does NOT have class 'dark') */
+        html:not(.dark) #emergencyText {
+            background-color: #ffffff !important; /* clean white background */
+            color: #0f172a !important;            /* dark slate text */
+            border-color: #cbd5e1 !important;     /* slate-300 border */
+        }
+        html:not(.dark) #emergencyText::placeholder {
+            color: #94a3b8 !important;           /* slate-400 placeholder */
+        }
+
         .glass-card { 
             background: rgba(15, 23, 42, 0.7); 
             backdrop-filter: blur(16px); 
@@ -82,7 +104,7 @@
                     
                     <div>
                         <label for="emergencyText" class="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-2">Emergency Description / Notes</label>
-                        <textarea id="emergencyText" rows="5" class="w-full rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors bg-white text-slate-900 border border-slate-300 placeholder-slate-400 dark:bg-slate-800 dark:text-white dark:border-slate-700 dark:placeholder-slate-500" placeholder="Describe the situation, injuries, and location..."></textarea>
+                        <textarea id="emergencyText" rows="5" class="w-full rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="Describe the situation, injuries, and location..."></textarea>
                     </div>
 
                     <!-- Media Uploads (Photo/Camera) -->
