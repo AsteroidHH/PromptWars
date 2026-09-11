@@ -66,15 +66,11 @@
             
             <!-- Left Column: Intake Console -->
             <div class="flex flex-col gap-6">
-                
-                <!-- Quick Demos -->
-                <div class="glass-card rounded-xl p-5">
-                    <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">Quick Scenario Demos</h2>
-                    <div class="flex flex-wrap gap-2">
-                        <button type="button" onclick="loadDemo('crash')" class="text-xs px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full transition-colors">⚡ Highway Crash (Hebbal)</button>
-                        <button type="button" onclick="loadDemo('fire')" class="text-xs px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full transition-colors">⚡ Factory Fire & Chemical</button>
-                        <button type="button" onclick="loadDemo('cardiac')" class="text-xs px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full transition-colors">⚡ Cardiac Collapse (Elderly)</button>
-                    </div>
+
+                <!-- Validation Error Alert -->
+                <div id="validationAlert" class="hidden bg-red-900/40 border border-red-500 text-red-200 p-4 rounded-lg flex items-center gap-3" role="alert" aria-live="assertive">
+                    <span class="text-xl">⚠️</span>
+                    <span class="font-medium">Please enter text, record a voice note, or provide a photo.</span>
                 </div>
 
                 <!-- Input Form -->
@@ -82,29 +78,69 @@
                     
                     <div>
                         <label for="textInput" class="block text-sm font-medium text-slate-300 mb-2">Emergency Description / Notes</label>
-                        <textarea id="textInput" rows="5" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg p-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Describe the situation, injuries, and location..." required></textarea>
+                        <textarea id="textInput" rows="5" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg p-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Describe the situation, injuries, and location..."></textarea>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <!-- Voice Record -->
-                        <div class="relative">
-                            <button type="button" id="recordAudioBtn" class="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg p-3 font-medium transition-all group">
-                                <span id="micIcon" class="text-xl">🎙️</span>
-                                <span id="recordText">Record Audio</span>
-                            </button>
-                        </div>
-                        
-                        <!-- Photo Upload -->
-                        <div class="relative">
-                            <input type="file" id="photoUpload" accept="image/*,audio/*" capture="environment" class="hidden">
-                            <label for="photoUpload" class="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg p-3 font-medium transition-all cursor-pointer">
+                    <!-- Media Uploads (Photo/Camera) -->
+                    <div class="flex flex-col gap-3">
+                        <label class="block text-sm font-medium text-slate-300">Visual Context</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="file" id="fileInput" accept="image/*" class="hidden">
+                            <label for="fileInput" class="w-full flex flex-col items-center justify-center gap-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg p-3 font-medium transition-all cursor-pointer">
+                                <span class="text-xl">📁</span>
+                                <span class="text-sm">Upload File</span>
+                            </label>
+                            
+                            <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden">
+                            <label for="cameraInput" class="w-full flex flex-col items-center justify-center gap-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg p-3 font-medium transition-all cursor-pointer">
                                 <span class="text-xl">📷</span>
-                                <span id="fileNameDisplay" class="truncate max-w-[150px]">Upload Photo</span>
+                                <span class="text-sm">Take Photo</span>
                             </label>
                         </div>
+                        
+                        <!-- Image Preview -->
+                        <div id="imagePreviewContainer" class="hidden bg-slate-900/80 border border-slate-700 rounded-lg p-3 flex items-center justify-between mt-2">
+                            <div class="flex items-center gap-3 overflow-hidden">
+                                <img id="imagePreviewThumb" src="" alt="Thumbnail" class="w-12 h-12 object-cover rounded bg-black">
+                                <div class="flex flex-col truncate">
+                                    <span id="imagePreviewName" class="text-sm font-medium text-slate-200 truncate"></span>
+                                    <span id="imagePreviewSize" class="text-xs text-slate-500"></span>
+                                </div>
+                            </div>
+                            <button type="button" id="removeImageBtn" class="text-slate-400 hover:text-red-400 p-2 rounded-full hover:bg-slate-800 transition-colors" aria-label="Remove image">
+                                ✕
+                            </button>
+                        </div>
                     </div>
 
-                    <button type="submit" id="submitBtn" class="mt-2 w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg p-4 font-bold text-lg transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)] hover:shadow-[0_0_25px_rgba(37,99,235,0.5)]">
+                    <!-- Voice Record -->
+                    <div class="flex flex-col gap-3">
+                        <label class="block text-sm font-medium text-slate-300">Audio Context</label>
+                        
+                        <!-- Mic Permission Alert -->
+                        <div id="micAlert" class="hidden bg-orange-900/40 border border-orange-500 text-orange-200 text-sm p-3 rounded-lg flex items-center gap-2">
+                            <span>🎤 Microphone access denied. Please allow permissions in your browser.</span>
+                        </div>
+
+                        <button type="button" id="recordAudioBtn" class="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg p-3 font-medium transition-all group">
+                            <span id="micIcon" class="text-xl">🎙️</span>
+                            <span id="recordText">Record Voice Note</span>
+                            <span id="recordTimer" class="hidden ml-2 font-mono text-red-400">00:00</span>
+                        </button>
+
+                        <!-- Audio Player -->
+                        <div id="audioPlayerContainer" class="hidden bg-slate-900/80 border border-slate-700 rounded-lg p-3 flex flex-col gap-2 mt-2">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-sm font-medium text-emerald-400">Audio Recorded</span>
+                                <button type="button" id="discardAudioBtn" class="text-slate-400 hover:text-red-400 text-sm flex items-center gap-1 transition-colors">
+                                    ✕ Discard
+                                </button>
+                            </div>
+                            <audio id="audioPlayer" controls class="w-full h-8"></audio>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="mt-4 w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg p-4 font-bold text-lg transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)] hover:shadow-[0_0_25px_rgba(37,99,235,0.5)]">
                         <span>Analyze Emergency</span>
                         <svg id="loadingSpinner" class="animate-spin h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -116,7 +152,6 @@
 
             <!-- Right Column: Results & Action Center -->
             <div id="resultsArea" class="hidden flex flex-col gap-6">
-                
                 <!-- Triage Header Card -->
                 <div id="triageCard" class="rounded-xl border p-6 shadow-2xl transition-all duration-500">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
@@ -183,7 +218,8 @@
                         </div>
                     </div>
                 </div>
-
+                
+                <button id="resetBtn" type="button" class="mt-2 w-full bg-slate-800 hover:bg-slate-700 text-white rounded-lg p-4 font-bold transition-all border border-slate-600">New Triage Case</button>
             </div>
             
             <!-- Placeholder for right column before submit -->
@@ -200,59 +236,92 @@
         // Init state
         document.getElementById('emptyState').classList.remove('hidden');
 
-        // Scenarios
-        const scenarios = {
-            'crash': "Massive car crash on Hebbal flyover going towards airport. Two cars involved. One driver is unconscious and bleeding heavily from the head, stuck in the seat. The other driver is walking around but holding their arm which looks broken. Traffic is still moving fast next to them.",
-            'fire': "Explosion at a chemical factory in Peenya. Thick yellow smoke everywhere. Three workers are on the ground coughing blood and struggling to breathe. Their skin is red and blistering. Some barrels are still burning.",
-            'cardiac': "My grandfather just collapsed in our living room. He was clutching his chest and sweating, now he's unresponsive. I don't think he is breathing normally, it sounds like gasping. He has a history of heart attacks."
-        };
-
-        function loadDemo(key) {
-            document.getElementById('textInput').value = scenarios[key];
-        }
-
         // Elements
         const form = document.getElementById('triageForm');
         const textInput = document.getElementById('textInput');
-        const photoUpload = document.getElementById('photoUpload');
-        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const fileInput = document.getElementById('fileInput');
+        const cameraInput = document.getElementById('cameraInput');
+        
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const imagePreviewThumb = document.getElementById('imagePreviewThumb');
+        const imagePreviewName = document.getElementById('imagePreviewName');
+        const imagePreviewSize = document.getElementById('imagePreviewSize');
+        const removeImageBtn = document.getElementById('removeImageBtn');
+
         const recordAudioBtn = document.getElementById('recordAudioBtn');
         const recordText = document.getElementById('recordText');
+        const recordTimer = document.getElementById('recordTimer');
+        const micAlert = document.getElementById('micAlert');
+        const audioPlayerContainer = document.getElementById('audioPlayerContainer');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const discardAudioBtn = document.getElementById('discardAudioBtn');
+        const validationAlert = document.getElementById('validationAlert');
+        
         const submitBtn = document.getElementById('submitBtn');
         const loadingSpinner = document.getElementById('loadingSpinner');
         const resultsArea = document.getElementById('resultsArea');
         const emptyState = document.getElementById('emptyState');
+        const resetBtn = document.getElementById('resetBtn');
 
+        // State Variables
+        let photoFile = null;
         let mediaRecorder;
         let audioChunks = [];
         let recordedAudioBlob = null;
+        let timerInterval;
+        let secondsRecorded = 0;
 
-        // Photo Upload UI
-        photoUpload.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                fileNameDisplay.textContent = e.target.files[0].name;
-                fileNameDisplay.classList.add('text-blue-400');
-                recordedAudioBlob = null; 
-                resetMicUI();
-            } else {
-                fileNameDisplay.textContent = 'Upload Photo';
-                fileNameDisplay.classList.remove('text-blue-400');
-            }
+        // --- Image Handling ---
+        function handleFileSelection(file) {
+            if (!file) return;
+            photoFile = file;
+            
+            // Populate Preview
+            imagePreviewName.textContent = file.name;
+            imagePreviewSize.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreviewThumb.src = e.target.result;
+                imagePreviewContainer.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        fileInput.addEventListener('change', (e) => handleFileSelection(e.target.files[0]));
+        cameraInput.addEventListener('change', (e) => handleFileSelection(e.target.files[0]));
+
+        removeImageBtn.addEventListener('click', () => {
+            photoFile = null;
+            fileInput.value = '';
+            cameraInput.value = '';
+            imagePreviewContainer.classList.add('hidden');
+            imagePreviewThumb.src = '';
         });
 
-        // Audio Recording UI
+        // --- Audio Handling ---
+        function formatTime(s) {
+            const mins = Math.floor(s / 60).toString().padStart(2, '0');
+            const secs = (s % 60).toString().padStart(2, '0');
+            return `${mins}:${secs}`;
+        }
+
         function resetMicUI() {
-            recordText.textContent = 'Record Audio';
+            recordText.textContent = 'Record Voice Note';
+            recordTimer.classList.add('hidden');
             recordAudioBtn.classList.remove('recording-pulse', 'bg-red-900/50', 'text-red-400', 'border-red-500/50');
+            clearInterval(timerInterval);
         }
 
         recordAudioBtn.addEventListener('click', async () => {
+            micAlert.classList.add('hidden'); // Hide errors on retry
+            validationAlert.classList.add('hidden'); // Hide validation error
+            
             if (mediaRecorder && mediaRecorder.state === 'recording') {
+                // Stop Recording
                 mediaRecorder.stop();
-                resetMicUI();
-                recordText.textContent = 'Voice Memo Ready';
-                recordAudioBtn.classList.add('text-emerald-400');
             } else {
+                // Start Recording
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     mediaRecorder = new MediaRecorder(stream);
@@ -261,25 +330,53 @@
                     mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
                     mediaRecorder.onstop = () => {
                         recordedAudioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                        photoUpload.value = '';
-                        fileNameDisplay.textContent = 'Upload Photo';
-                        fileNameDisplay.classList.remove('text-blue-400');
+                        audioPlayer.src = URL.createObjectURL(recordedAudioBlob);
+                        audioPlayerContainer.classList.remove('hidden');
+                        recordAudioBtn.classList.add('hidden'); // hide record button while recorded audio exists
+                        resetMicUI();
                         stream.getTracks().forEach(track => track.stop());
                     };
 
                     mediaRecorder.start();
+                    
+                    // UI Updates
+                    audioPlayerContainer.classList.add('hidden');
                     recordText.textContent = 'Recording... (Tap to Stop)';
-                    recordAudioBtn.classList.remove('text-emerald-400');
+                    recordTimer.textContent = '00:00';
+                    recordTimer.classList.remove('hidden');
                     recordAudioBtn.classList.add('recording-pulse', 'bg-red-900/50', 'text-red-400', 'border-red-500/50');
+                    
+                    secondsRecorded = 0;
+                    timerInterval = setInterval(() => {
+                        secondsRecorded++;
+                        recordTimer.textContent = formatTime(secondsRecorded);
+                    }, 1000);
+
                 } catch (err) {
-                    alert('Microphone access denied.');
+                    console.error(err);
+                    micAlert.classList.remove('hidden');
                 }
             }
         });
 
-        // Form Submit
+        discardAudioBtn.addEventListener('click', () => {
+            recordedAudioBlob = null;
+            audioPlayer.src = '';
+            audioPlayerContainer.classList.add('hidden');
+            recordAudioBtn.classList.remove('hidden');
+            resetMicUI();
+        });
+
+        // --- Form Submission ---
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            validationAlert.classList.add('hidden');
+            
+            // Validation
+            if (!textInput.value.trim() && !recordedAudioBlob && !photoFile) {
+                validationAlert.classList.remove('hidden');
+                return;
+            }
             
             // Loading State
             submitBtn.disabled = true;
@@ -289,12 +386,16 @@
             resultsArea.classList.add('hidden');
 
             const formData = new FormData();
-            formData.append('text_input', textInput.value);
+            if (textInput.value.trim()) formData.append('text_input', textInput.value.trim());
+            else formData.append('text_input', 'Please analyze the provided media.');
 
+            // Attach Media (Audio gets priority if both exist, though Gemini supports both, our backend expects one `media` file currently)
+            // Wait, the backend accepts `Optional[UploadFile] = File(None)`. If we send multiple, it only takes one. Let's send audio if it exists, else photo.
+            // Actually, backend only accepts one `media` field. 
             if (recordedAudioBlob) {
                 formData.append('media', recordedAudioBlob, 'voicememo.webm');
-            } else if (photoUpload.files.length > 0) {
-                formData.append('media', photoUpload.files[0]);
+            } else if (photoFile) {
+                formData.append('media', photoFile);
             }
 
             try {
@@ -321,12 +422,12 @@
             
             // Reset classes
             card.className = 'rounded-xl border p-6 shadow-2xl transition-all duration-500';
-            banner.textContent = data.triage_tag.split('-')[0].trim(); // Just the color word or short version
+            banner.textContent = data.triage_tag.split('-')[0].trim(); 
             
             if (data.triage_tag.includes('RED')) {
                 card.classList.add('bg-red-950/80', 'border-red-500', 'text-red-100');
                 pulse.classList.add('bg-red-500');
-                banner.textContent = data.triage_tag; // Full text for clarity
+                banner.textContent = data.triage_tag;
             } else if (data.triage_tag.includes('YELLOW')) {
                 card.classList.add('bg-amber-950/80', 'border-amber-500', 'text-amber-100');
                 pulse.classList.add('bg-amber-500');
@@ -387,6 +488,33 @@
                 mapsBtn.classList.add('hidden');
             }
         }
+
+        // --- Reset Logic ---
+        resetBtn.addEventListener('click', () => {
+            textInput.value = '';
+            
+            // Clear Photo
+            photoFile = null;
+            fileInput.value = '';
+            cameraInput.value = '';
+            imagePreviewContainer.classList.add('hidden');
+            imagePreviewThumb.src = '';
+            
+            // Clear Audio
+            recordedAudioBlob = null;
+            audioPlayer.src = '';
+            audioPlayerContainer.classList.add('hidden');
+            recordAudioBtn.classList.remove('hidden');
+            resetMicUI();
+            micAlert.classList.add('hidden');
+            validationAlert.classList.add('hidden');
+
+            // UI State
+            form.style.display = 'flex';
+            resultsArea.classList.add('hidden');
+            emptyState.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
     </script>
 </body>
 </html>
