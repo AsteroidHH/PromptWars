@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
@@ -41,19 +42,22 @@
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-200 min-h-screen flex flex-col">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 min-h-screen flex flex-col">
 
     <!-- Header -->
-    <header class="border-b border-slate-800 bg-slate-950/80 sticky top-0 z-50 backdrop-blur-md">
+    <header class="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/80 sticky top-0 z-50 backdrop-blur-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="relative flex h-4 w-4">
                   <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                   <span class="relative inline-flex rounded-full h-4 w-4 bg-red-500"></span>
                 </div>
-                <h1 class="text-2xl font-bold tracking-tight text-white">Sanjeevani <span class="text-slate-400 font-medium">Triage</span></h1>
+                <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Sanjeevani <span class="text-slate-600 dark:text-slate-400 font-medium">Triage</span></h1>
             </div>
-            <div class="flex items-center gap-2 px-3 py-1 bg-emerald-900/30 border border-emerald-800/50 rounded-full">
+            <button id="themeToggle" class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-100 dark:bg-slate-800 transition-colors text-xl" aria-label="Toggle Theme">
+                <span id="themeIcon">🌙</span>
+            </button>
+            <div class="flex items-center gap-2 px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 border border-emerald-300 dark:border-emerald-800/50 rounded-full">
                 <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
                 <span class="text-xs font-medium text-emerald-300 tracking-wide uppercase">Gemini 3.7 Active</span>
             </div>
@@ -74,40 +78,40 @@
                 </div>
 
                 <!-- Input Form -->
-                <form id="triageForm" class="glass-card rounded-xl p-6 flex flex-col gap-5">
+                <form id="triageForm" class="bg-white/80 dark:glass-card border border-slate-200 dark:border-slate-700 shadow-sm rounded-xl p-6 flex flex-col gap-5">
                     
                     <div>
-                        <label for="textInput" class="block text-sm font-medium text-slate-300 mb-2">Emergency Description / Notes</label>
-                        <textarea id="textInput" rows="5" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg p-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Describe the situation, injuries, and location..."></textarea>
+                        <label for="textInput" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Emergency Description / Notes</label>
+                        <textarea id="textInput" rows="5" class="w-full bg-white dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-lg p-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Describe the situation, injuries, and location..."></textarea>
                     </div>
 
                     <!-- Media Uploads (Photo/Camera) -->
                     <div class="flex flex-col gap-3">
-                        <label class="block text-sm font-medium text-slate-300">Visual Context</label>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Visual Context</label>
                         <div class="grid grid-cols-2 gap-4">
                             <input type="file" id="fileInput" accept="image/*" class="hidden">
-                            <label for="fileInput" class="w-full flex flex-col items-center justify-center gap-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg p-3 font-medium transition-all cursor-pointer">
+                            <label for="fileInput" class="w-full flex flex-col items-center justify-center gap-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-lg p-3 font-medium transition-all cursor-pointer">
                                 <span class="text-xl">📁</span>
                                 <span class="text-sm">Upload File</span>
                             </label>
                             
                             <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden">
-                            <label for="cameraInput" class="w-full flex flex-col items-center justify-center gap-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg p-3 font-medium transition-all cursor-pointer">
+                            <label for="cameraInput" class="w-full flex flex-col items-center justify-center gap-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-lg p-3 font-medium transition-all cursor-pointer">
                                 <span class="text-xl">📷</span>
                                 <span class="text-sm">Take Photo</span>
                             </label>
                         </div>
                         
                         <!-- Image Preview -->
-                        <div id="imagePreviewContainer" class="hidden bg-slate-900/80 border border-slate-700 rounded-lg p-3 flex items-center justify-between mt-2">
+                        <div id="imagePreviewContainer" class="hidden bg-white dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 rounded-lg p-3 flex items-center justify-between mt-2">
                             <div class="flex items-center gap-3 overflow-hidden">
                                 <img id="imagePreviewThumb" src="" alt="Thumbnail" class="w-12 h-12 object-cover rounded bg-black">
                                 <div class="flex flex-col truncate">
-                                    <span id="imagePreviewName" class="text-sm font-medium text-slate-200 truncate"></span>
-                                    <span id="imagePreviewSize" class="text-xs text-slate-500"></span>
+                                    <span id="imagePreviewName" class="text-sm font-medium text-slate-800 dark:text-slate-200 truncate"></span>
+                                    <span id="imagePreviewSize" class="text-xs text-slate-500 dark:text-slate-500"></span>
                                 </div>
                             </div>
-                            <button type="button" id="removeImageBtn" class="text-slate-400 hover:text-red-400 p-2 rounded-full hover:bg-slate-800 transition-colors" aria-label="Remove image">
+                            <button type="button" id="removeImageBtn" class="text-slate-600 dark:text-slate-400 hover:text-red-400 p-2 rounded-full hover:bg-slate-100 dark:bg-slate-800 transition-colors" aria-label="Remove image">
                                 ✕
                             </button>
                         </div>
@@ -115,24 +119,24 @@
 
                     <!-- Voice Record -->
                     <div class="flex flex-col gap-3">
-                        <label class="block text-sm font-medium text-slate-300">Audio Context</label>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Audio Context</label>
                         
                         <!-- Mic Permission Alert -->
                         <div id="micAlert" class="hidden bg-orange-900/40 border border-orange-500 text-orange-200 text-sm p-3 rounded-lg flex items-center gap-2">
                             <span>🎤 Microphone access denied. Please allow permissions in your browser.</span>
                         </div>
 
-                        <button type="button" id="recordAudioBtn" class="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg p-3 font-medium transition-all group">
+                        <button type="button" id="recordAudioBtn" class="w-full flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-lg p-3 font-medium transition-all group">
                             <span id="micIcon" class="text-xl">🎙️</span>
                             <span id="recordText">Record Voice Note</span>
                             <span id="recordTimer" class="hidden ml-2 font-mono text-red-400">00:00</span>
                         </button>
 
                         <!-- Audio Player -->
-                        <div id="audioPlayerContainer" class="hidden bg-slate-900/80 border border-slate-700 rounded-lg p-3 flex flex-col gap-2 mt-2">
+                        <div id="audioPlayerContainer" class="hidden bg-white dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 rounded-lg p-3 flex flex-col gap-2 mt-2">
                             <div class="flex items-center justify-between mb-1">
                                 <span class="text-sm font-medium text-emerald-400">Audio Recorded</span>
-                                <button type="button" id="discardAudioBtn" class="text-slate-400 hover:text-red-400 text-sm flex items-center gap-1 transition-colors">
+                                <button type="button" id="discardAudioBtn" class="text-slate-600 dark:text-slate-400 hover:text-red-400 text-sm flex items-center gap-1 transition-colors">
                                     ✕ Discard
                                 </button>
                             </div>
@@ -140,9 +144,9 @@
                         </div>
                     </div>
 
-                    <button type="submit" id="submitBtn" class="mt-4 w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg p-4 font-bold text-lg transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)] hover:shadow-[0_0_25px_rgba(37,99,235,0.5)]">
+                    <button type="submit" id="submitBtn" class="mt-4 w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-slate-900 dark:text-white rounded-lg p-4 font-bold text-lg transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)] hover:shadow-[0_0_25px_rgba(37,99,235,0.5)]">
                         <span>Analyze Emergency</span>
-                        <svg id="loadingSpinner" class="animate-spin h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <svg id="loadingSpinner" class="animate-spin h-5 w-5 text-slate-900 dark:text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
@@ -163,6 +167,15 @@
                             🛡️ <span id="confidenceText"></span>
                         </div>
                     </div>
+                    <!-- Emergency Hotlines -->
+                    <div class="flex flex-wrap gap-3 mt-4 w-full">
+                        <a href="tel:112" class="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-500 text-slate-900 dark:text-white py-3 px-4 rounded-lg font-bold transition-colors shadow-md text-sm sm:text-base">
+                            📞 Call 112 (National)
+                        </a>
+                        <a href="tel:108" class="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-slate-900 dark:text-white py-3 px-4 rounded-lg font-bold transition-colors shadow-md text-sm sm:text-base">
+                            🚑 Call 108 (Ambulance)
+                        </a>
+                    </div>
                     
                     <!-- Hazard Chips -->
                     <div id="hazardContainer" class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-white/20">
@@ -171,15 +184,28 @@
                 </div>
 
                 <!-- Hospital Dispatch Maps Button -->
-                <a id="mapsButton" href="#" target="_blank" class="hidden group relative w-full flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl p-4 font-bold text-lg transition-all shadow-lg overflow-hidden">
+                <a id="mapsButton" href="#" target="_blank" class="hidden group relative w-full flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-500 text-slate-900 dark:text-white rounded-xl p-4 font-bold text-lg transition-all shadow-lg overflow-hidden">
                     <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
                     <span class="relative text-2xl">🏥</span>
                     <span class="relative">Open Nearest Trauma Center on Google Maps</span>
                 </a>
+                
+                <!-- Copy Dispatch Button -->
+                <button id="copyDispatchBtn" type="button" class="w-full flex items-center justify-center gap-2 bg-slate-200 dark:bg-slate-100 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-900 dark:text-white rounded-xl p-4 font-bold text-lg transition-all shadow-md relative mt-4">
+                    <span class="text-xl">📋</span> Copy Dispatch Card
+                    <span id="copyTooltip" class="absolute top-[-30px] bg-emerald-500 text-slate-900 dark:text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity duration-300">✓ Copied to clipboard!</span>
+                </button>
+
 
                 <!-- Bystander Actions -->
-                <div class="glass-card rounded-xl p-6">
-                    <h3 class="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-2">Immediate Bystander Actions</h3>
+                <div class="bg-white/80 dark:glass-card border border-slate-200 dark:border-slate-700 shadow-sm rounded-xl p-6">
+                    <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-300 dark:border-slate-700 pb-2">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-slate-900 dark:text-white">Immediate Bystander Actions</h3>
+                        <div class="flex gap-2">
+                            <button id="readAloudBtn" type="button" class="text-sm px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors flex items-center gap-1 font-medium">🔊 Read Aloud</button>
+                            <button id="stopAloudBtn" type="button" class="hidden text-sm px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-800/50 transition-colors flex items-center gap-1 font-medium">⏹️ Stop</button>
+                        </div>
+                    </div>
                     <div id="bystanderSteps" class="flex flex-col gap-4">
                         <!-- Filled by JS -->
                     </div>
@@ -196,37 +222,37 @@
                 </div>
 
                 <!-- Clinical Handoff -->
-                <div class="glass-card rounded-xl p-6">
-                    <h3 class="text-lg font-bold text-slate-300 mb-4 border-b border-slate-700 pb-2">Clinical Handoff Telemetry</h3>
+                <div class="bg-white/80 dark:glass-card border border-slate-200 dark:border-slate-700 shadow-sm rounded-xl p-6">
+                    <h3 class="text-lg font-bold text-slate-700 dark:text-slate-300 mb-4 border-b border-slate-300 dark:border-slate-700 pb-2">Clinical Handoff Telemetry</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                        <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-800">
-                            <span class="text-slate-500 block mb-1 uppercase text-xs font-bold">Patient Status</span>
-                            <span id="patientStatus" class="text-slate-200 font-medium"></span>
+                        <div class="bg-white dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-800">
+                            <span class="text-slate-500 dark:text-slate-500 block mb-1 uppercase text-xs font-bold">Patient Status</span>
+                            <span id="patientStatus" class="text-slate-800 dark:text-slate-200 font-medium"></span>
                         </div>
-                        <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-800">
-                            <span class="text-slate-500 block mb-1 uppercase text-xs font-bold">Req. Care Level</span>
-                            <span id="careLevel" class="text-slate-200 font-medium"></span>
+                        <div class="bg-white dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-800">
+                            <span class="text-slate-500 dark:text-slate-500 block mb-1 uppercase text-xs font-bold">Req. Care Level</span>
+                            <span id="careLevel" class="text-slate-800 dark:text-slate-200 font-medium"></span>
                         </div>
-                        <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-800 sm:col-span-2">
-                            <span class="text-slate-500 block mb-1 uppercase text-xs font-bold">Suspected Trauma/Injuries</span>
+                        <div class="bg-white dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-800 sm:col-span-2">
+                            <span class="text-slate-500 dark:text-slate-500 block mb-1 uppercase text-xs font-bold">Suspected Trauma/Injuries</span>
                             <div id="suspectedInjuries" class="flex flex-wrap gap-2 mt-2"></div>
                         </div>
-                        <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-800 sm:col-span-2">
-                            <span class="text-slate-500 block mb-1 uppercase text-xs font-bold">Scene Safety & Notes</span>
-                            <span id="verificationNotes" class="text-slate-300 italic block mt-1"></span>
-                            <span id="bystanderAdvice" class="text-slate-200 block mt-2"></span>
+                        <div class="bg-white dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-800 sm:col-span-2">
+                            <span class="text-slate-500 dark:text-slate-500 block mb-1 uppercase text-xs font-bold">Scene Safety & Notes</span>
+                            <span id="verificationNotes" class="text-slate-700 dark:text-slate-300 italic block mt-1"></span>
+                            <span id="bystanderAdvice" class="text-slate-800 dark:text-slate-200 block mt-2"></span>
                         </div>
                     </div>
                 </div>
                 
-                <button id="resetBtn" type="button" class="mt-2 w-full bg-slate-800 hover:bg-slate-700 text-white rounded-lg p-4 font-bold transition-all border border-slate-600">New Triage Case</button>
+                <button id="resetBtn" type="button" class="mt-2 w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg p-4 font-bold transition-all border border-slate-400 dark:border-slate-600">New Triage Case</button>
             </div>
             
             <!-- Placeholder for right column before submit -->
-            <div id="emptyState" class="hidden lg:flex flex-col items-center justify-center h-full glass-card rounded-xl p-10 text-center opacity-50">
+            <div id="emptyState" class="hidden lg:flex flex-col items-center justify-center h-full bg-white/80 dark:glass-card border border-slate-200 dark:border-slate-700 shadow-sm rounded-xl p-10 text-center opacity-50">
                 <span class="text-6xl mb-4">🚑</span>
-                <h3 class="text-xl font-bold text-slate-300 mb-2">Awaiting Emergency Input</h3>
-                <p class="text-slate-500 max-w-sm">Use the console on the left to submit an emergency via text, audio, or photo. The AI triage results will appear here.</p>
+                <h3 class="text-xl font-bold text-slate-700 dark:text-slate-300 mb-2">Awaiting Emergency Input</h3>
+                <p class="text-slate-500 dark:text-slate-500 max-w-sm">Use the console on the left to submit an emergency via text, audio, or photo. The AI triage results will appear here.</p>
             </div>
 
         </div>
@@ -262,6 +288,105 @@
         const resultsArea = document.getElementById('resultsArea');
         const emptyState = document.getElementById('emptyState');
         const resetBtn = document.getElementById('resetBtn');
+
+        // --- Theme Switcher ---
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const html = document.documentElement;
+        
+        function setTheme(isDark) {
+            if (isDark) {
+                html.classList.add('dark');
+                themeIcon.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                html.classList.remove('dark');
+                themeIcon.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+        
+        // Init theme
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            setTheme(true);
+        } else {
+            setTheme(false);
+        }
+        
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                setTheme(!html.classList.contains('dark'));
+            });
+        }
+
+        // --- TTS Read Aloud ---
+        const readAloudBtn = document.getElementById('readAloudBtn');
+        const stopAloudBtn = document.getElementById('stopAloudBtn');
+        let currentUtterance = null;
+        
+        if(readAloudBtn && stopAloudBtn) {
+            readAloudBtn.addEventListener('click', () => {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel(); // clear queue
+                    
+                    const steps = Array.from(document.querySelectorAll('#bystanderSteps p')).map(p => p.textContent).join('. ');
+                    if(!steps) return;
+                    
+                    currentUtterance = new SpeechSynthesisUtterance("Immediate actions required. " + steps);
+                    currentUtterance.rate = 0.95;
+                    
+                    currentUtterance.onstart = () => {
+                        readAloudBtn.classList.add('hidden');
+                        stopAloudBtn.classList.remove('hidden');
+                    };
+                    currentUtterance.onend = () => {
+                        readAloudBtn.classList.remove('hidden');
+                        stopAloudBtn.classList.add('hidden');
+                    };
+                    
+                    window.speechSynthesis.speak(currentUtterance);
+                } else {
+                    alert("Text-to-speech is not supported in this browser.");
+                }
+            });
+            
+            stopAloudBtn.addEventListener('click', () => {
+                window.speechSynthesis.cancel();
+                readAloudBtn.classList.remove('hidden');
+                stopAloudBtn.classList.add('hidden');
+            });
+        }
+
+        // --- Copy Dispatch ---
+        const copyDispatchBtn = document.getElementById('copyDispatchBtn');
+        const copyTooltip = document.getElementById('copyTooltip');
+        
+        if(copyDispatchBtn) {
+            copyDispatchBtn.addEventListener('click', () => {
+                const banner = document.getElementById('triageBanner').textContent;
+                const status = document.getElementById('patientStatus').textContent;
+                const care = document.getElementById('careLevel').textContent;
+                
+                // hazards
+                const hazardsEls = document.querySelectorAll('#hazardContainer span');
+                const hazards = Array.from(hazardsEls).map(el => el.textContent.replace('⚠️ ', '')).join(', ') || 'None';
+                
+                const dispatchText = `SANJEEVANI DISPATCH SUMMARY\n` +
+                                     `---------------------------\n` +
+                                     `Triage: ${banner}\n` +
+                                     `Patient Status: ${status}\n` +
+                                     `Care Level: ${care}\n` +
+                                     `Active Hazards: ${hazards}\n` +
+                                     `---------------------------`;
+                                     
+                navigator.clipboard.writeText(dispatchText).then(() => {
+                    copyTooltip.classList.remove('opacity-0');
+                    setTimeout(() => copyTooltip.classList.add('opacity-0'), 2000);
+                });
+            });
+        }
+
+
 
         // State Variables
         let photoFile = null;
@@ -437,7 +562,7 @@
                 pulse.classList.add('bg-emerald-500');
                 banner.textContent = data.triage_tag;
             } else {
-                card.classList.add('bg-slate-900', 'border-slate-500', 'text-slate-300');
+                card.classList.add('bg-white dark:bg-slate-900', 'border-slate-500', 'text-slate-700 dark:text-slate-300');
                 pulse.classList.add('bg-slate-500');
                 banner.textContent = data.triage_tag;
             }
@@ -458,11 +583,11 @@
             // Bystander Steps (Numbered Cards)
             const stepsContainer = document.getElementById('bystanderSteps');
             stepsContainer.innerHTML = data.bystander_actions.immediate_steps.map((step, idx) => `
-                <div class="flex items-start gap-4 bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
+                <div class="flex items-start gap-4 bg-white dark:bg-slate-900/60 p-4 rounded-lg border border-slate-300 dark:border-slate-700/50">
                     <div class="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 font-bold flex items-center justify-center border border-blue-500/30">
                         ${idx + 1}
                     </div>
-                    <p class="text-slate-200 mt-1">${step}</p>
+                    <p class="text-slate-800 dark:text-slate-200 mt-1">${step}</p>
                 </div>
             `).join('');
 
@@ -474,7 +599,7 @@
             document.getElementById('careLevel').textContent = data.clinical_summary.recommended_trauma_level;
             
             const injuriesContainer = document.getElementById('suspectedInjuries');
-            injuriesContainer.innerHTML = data.clinical_summary.suspected_injuries.map(i => `<span class="px-2 py-1 bg-slate-800 text-slate-300 text-xs rounded border border-slate-700">${i}</span>`).join('');
+            injuriesContainer.innerHTML = data.clinical_summary.suspected_injuries.map(i => `<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs rounded border border-slate-300 dark:border-slate-700">${i}</span>`).join('');
             
             document.getElementById('verificationNotes').textContent = "Note: " + data.verification_notes;
             document.getElementById('bystanderAdvice').textContent = "Scene Safety: " + data.scene_hazards.bystander_safety_advice;
