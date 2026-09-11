@@ -3,390 +3,290 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sanjeevani Triage | Emergency Responder</title>
+    <title>Sanjeevani | Emergency Triage AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    animation: {
+                        'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            --bg-color: #121212;
-            --text-color: #FFFFFF;
-            --primary-accent: #00A3E0;
-            --focus-outline: #FFD700;
-            --danger-bg: #8B0000;
-            --danger-text: #FFCCCC;
-            --success-bg: #004d00;
-            --success-text: #b3ffb3;
-            --warning-bg: #b37700;
-            --warning-text: #ffe6b3;
-            --card-bg: #1E1E1E;
-            --border-color: #444;
+        body { font-family: 'Inter', sans-serif; }
+        .glass-card { 
+            background: rgba(15, 23, 42, 0.7); 
+            backdrop-filter: blur(16px); 
+            -webkit-backdrop-filter: blur(16px); 
+            border: 1px solid rgba(51, 65, 85, 0.5); 
         }
-
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            line-height: 1.6;
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        .hidden { display: none !important; }
+        .recording-pulse {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            animation: pulse-ring 1.5s cubic-bezier(0.66, 0, 0, 1) infinite;
         }
-
-        main {
-            max-width: 800px;
-            margin: 0 auto;
+        @keyframes pulse-ring {
+            100% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
         }
-
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            border-bottom: 2px solid var(--primary-accent);
-            padding-bottom: 10px;
-        }
-
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
-        }
-
-        *:focus {
-            outline: 3px solid var(--focus-outline);
-            outline-offset: 2px;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
-
-        label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 8px;
-            font-size: 1.2rem;
-        }
-
-        textarea {
-            width: 100%;
-            min-height: 120px;
-            background: var(--bg-color);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-            padding: 10px;
-            font-size: 1.1rem;
-            border-radius: 4px;
-            resize: vertical;
-            box-sizing: border-box;
-        }
-
-        .media-controls {
-            display: flex;
-            gap: 15px;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-
-        button, .file-upload-label {
-            background-color: var(--primary-accent);
-            color: #fff;
-            border: none;
-            padding: 12px 24px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            text-align: center;
-            display: inline-block;
-        }
-
-        button:hover, .file-upload-label:hover {
-            filter: brightness(1.2);
-        }
-
-        button:disabled {
-            background-color: #555;
-            cursor: not-allowed;
-            color: #999;
-        }
-
-        input[type="file"] {
-            display: none;
-        }
-
-        #submitBtn {
-            width: 100%;
-            background-color: #2e7d32;
-            font-size: 1.5rem;
-            padding: 15px;
-            margin-top: 20px;
-        }
-
-        .loading-state {
-            display: none;
-            text-align: center;
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-top: 20px;
-            padding: 20px;
-            background: var(--card-bg);
-            border-radius: 8px;
-        }
-
-        /* Triage Results Display */
-        #resultsArea {
-            display: none;
-            margin-top: 30px;
-        }
-
-        .triage-banner {
-            padding: 20px;
-            font-size: 2rem;
-            font-weight: 900;
-            text-align: center;
-            text-transform: uppercase;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            letter-spacing: 2px;
-        }
-
-        .triage-RED { background-color: #ff0000; color: #ffffff; }
-        .triage-YELLOW { background-color: #ffd700; color: #000000; }
-        .triage-GREEN { background-color: #008000; color: #ffffff; }
-        .triage-BLACK { background-color: #000000; color: #ffffff; border: 2px solid #555; }
-
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .card h2 {
-            margin-top: 0;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
-        }
-
-        .critical-warnings {
-            background-color: var(--danger-bg);
-            color: var(--danger-text);
-            border: 2px solid #ff4d4d;
-        }
-
-        .steps-list {
-            font-size: 1.3rem;
-            padding-left: 20px;
-        }
-
-        .steps-list li {
-            margin-bottom: 15px;
-            font-weight: 500;
-        }
-
-        .badges {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-
-        .badge {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-
-        .badge-confidence { background: #4b0082; color: #e6e6fa; border: 1px solid #9370db; }
-        .badge-hazard { background: #b8860b; color: #fff; border: 1px solid #ffd700; }
-
-        .maps-btn {
-            background-color: #1a73e8;
-            color: white;
-            text-decoration: none;
-            display: block;
-            text-align: center;
-            padding: 15px;
-            font-size: 1.3rem;
-            border-radius: 8px;
-            font-weight: bold;
-            margin-top: 20px;
-        }
-
-        .maps-btn:hover { background-color: #1557b0; }
-
-        #recordingStatus {
-            color: #ff4d4d;
-            font-weight: bold;
-            display: none;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .blink {
-            animation: blinker 1s linear infinite;
-        }
-        @keyframes blinker {
-            50% { opacity: 0; }
-        }
-
     </style>
 </head>
-<body>
+<body class="bg-slate-950 text-slate-200 min-h-screen flex flex-col">
 
-    <main>
-        <header>
-            <h1>Sanjeevani Triage</h1>
-            <p>High-contrast emergency intake. Provide details below to generate a verified life-saving action plan.</p>
-        </header>
-
-        <form id="triageForm" aria-labelledby="formHeading">
-            <h2 id="formHeading" class="sr-only">Emergency Input Form</h2>
-            
-            <div class="input-group">
-                <label for="textInput">Emergency Description / Notes</label>
-                <textarea id="textInput" placeholder="Describe the situation, injuries, and location..." required aria-required="true"></textarea>
-                
-                <div class="media-controls">
-                    <button type="button" id="recordAudioBtn" aria-pressed="false">🎙️ Record Audio</button>
-                    <span id="recordingStatus" aria-live="polite"><span class="blink">●</span> Recording...</span>
-                    
-                    <label for="photoUpload" class="file-upload-label">
-                        📷 Upload Photo
-                    </label>
-                    <input type="file" id="photoUpload" accept="image/*,audio/*" capture="environment">
-                    <span id="fileNameDisplay" aria-live="polite">No file selected</span>
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-950/80 sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="relative flex h-4 w-4">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-4 w-4 bg-red-500"></span>
                 </div>
+                <h1 class="text-2xl font-bold tracking-tight text-white">Sanjeevani <span class="text-slate-400 font-medium">Triage</span></h1>
             </div>
-
-            <button type="submit" id="submitBtn">Generate Action Plan</button>
-        </form>
-
-        <div id="loadingIndicator" class="loading-state" role="status" aria-live="assertive">
-            <p>Analyzing emergency data... Please stand by.</p>
+            <div class="flex items-center gap-2 px-3 py-1 bg-emerald-900/30 border border-emerald-800/50 rounded-full">
+                <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                <span class="text-xs font-medium text-emerald-300 tracking-wide uppercase">Gemini 3.7 Active</span>
+            </div>
         </div>
+    </header>
 
-        <section id="resultsArea" aria-live="polite">
-            <h2 class="sr-only">Triage Results</h2>
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
             
-            <div id="triageBanner" class="triage-banner" role="alert">
-                <!-- Triage tag populated here -->
+            <!-- Left Column: Intake Console -->
+            <div class="flex flex-col gap-6">
+                
+                <!-- Quick Demos -->
+                <div class="glass-card rounded-xl p-5">
+                    <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">Quick Scenario Demos</h2>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" onclick="loadDemo('crash')" class="text-xs px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full transition-colors">⚡ Highway Crash (Hebbal)</button>
+                        <button type="button" onclick="loadDemo('fire')" class="text-xs px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full transition-colors">⚡ Factory Fire & Chemical</button>
+                        <button type="button" onclick="loadDemo('cardiac')" class="text-xs px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full transition-colors">⚡ Cardiac Collapse (Elderly)</button>
+                    </div>
+                </div>
+
+                <!-- Input Form -->
+                <form id="triageForm" class="glass-card rounded-xl p-6 flex flex-col gap-5">
+                    
+                    <div>
+                        <label for="textInput" class="block text-sm font-medium text-slate-300 mb-2">Emergency Description / Notes</label>
+                        <textarea id="textInput" rows="5" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg p-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Describe the situation, injuries, and location..." required></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Voice Record -->
+                        <div class="relative">
+                            <button type="button" id="recordAudioBtn" class="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg p-3 font-medium transition-all group">
+                                <span id="micIcon" class="text-xl">🎙️</span>
+                                <span id="recordText">Record Audio</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Photo Upload -->
+                        <div class="relative">
+                            <input type="file" id="photoUpload" accept="image/*,audio/*" capture="environment" class="hidden">
+                            <label for="photoUpload" class="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg p-3 font-medium transition-all cursor-pointer">
+                                <span class="text-xl">📷</span>
+                                <span id="fileNameDisplay" class="truncate max-w-[150px]">Upload Photo</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="mt-2 w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg p-4 font-bold text-lg transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)] hover:shadow-[0_0_25px_rgba(37,99,235,0.5)]">
+                        <span>Analyze Emergency</span>
+                        <svg id="loadingSpinner" class="animate-spin h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
+                </form>
             </div>
 
-            <div class="badges">
-                <span id="confidenceBadge" class="badge badge-confidence"></span>
-                <span id="hazardBadge" class="badge badge-hazard"></span>
-            </div>
+            <!-- Right Column: Results & Action Center -->
+            <div id="resultsArea" class="hidden flex flex-col gap-6">
+                
+                <!-- Triage Header Card -->
+                <div id="triageCard" class="rounded-xl border p-6 shadow-2xl transition-all duration-500">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                        <div class="flex items-center gap-3">
+                            <div id="triagePulse" class="h-4 w-4 rounded-full animate-pulse"></div>
+                            <h2 id="triageBanner" class="text-3xl font-extrabold uppercase tracking-tight"></h2>
+                        </div>
+                        <div id="confidencePill" class="px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 bg-black/30 border border-white/20">
+                            🛡️ <span id="confidenceText"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Hazard Chips -->
+                    <div id="hazardContainer" class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-white/20">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
 
-            <a id="mapsButton" href="#" target="_blank" class="maps-btn" style="display:none;" aria-label="Open nearest hospital on Google Maps">
-                🏥 Open Nearest Hospital on Google Maps
-            </a>
+                <!-- Hospital Dispatch Maps Button -->
+                <a id="mapsButton" href="#" target="_blank" class="hidden group relative w-full flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl p-4 font-bold text-lg transition-all shadow-lg overflow-hidden">
+                    <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
+                    <span class="relative text-2xl">🏥</span>
+                    <span class="relative">Open Nearest Trauma Center on Google Maps</span>
+                </a>
 
-            <div class="card">
-                <h2>Immediate Action Steps</h2>
-                <ol id="bystanderSteps" class="steps-list"></ol>
-            </div>
+                <!-- Bystander Actions -->
+                <div class="glass-card rounded-xl p-6">
+                    <h3 class="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-2">Immediate Bystander Actions</h3>
+                    <div id="bystanderSteps" class="flex flex-col gap-4">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
 
-            <div class="card critical-warnings" role="alert">
-                <h2>CRITICAL WARNINGS (DO NOT DO)</h2>
-                <ul id="criticalWarnings" class="steps-list"></ul>
-            </div>
+                <!-- Critical Warnings -->
+                <div class="bg-red-950/40 border border-red-500/50 rounded-xl p-6">
+                    <h3 class="text-lg font-bold text-red-400 mb-4 flex items-center gap-2">
+                        <span class="text-xl">⚠️</span> CRITICAL CONTRAINDICATIONS (DO NOT DO)
+                    </h3>
+                    <ul id="criticalWarnings" class="list-disc list-inside text-red-200 space-y-2 font-medium">
+                        <!-- Filled by JS -->
+                    </ul>
+                </div>
 
-            <div class="card">
-                <h2>Clinical Summary</h2>
-                <p><strong>Patient Status:</strong> <span id="patientStatus"></span></p>
-                <p><strong>Suspected Injuries:</strong> <span id="suspectedInjuries"></span></p>
-                <p><strong>Verification Notes:</strong> <span id="verificationNotes"></span></p>
+                <!-- Clinical Handoff -->
+                <div class="glass-card rounded-xl p-6">
+                    <h3 class="text-lg font-bold text-slate-300 mb-4 border-b border-slate-700 pb-2">Clinical Handoff Telemetry</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                        <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-800">
+                            <span class="text-slate-500 block mb-1 uppercase text-xs font-bold">Patient Status</span>
+                            <span id="patientStatus" class="text-slate-200 font-medium"></span>
+                        </div>
+                        <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-800">
+                            <span class="text-slate-500 block mb-1 uppercase text-xs font-bold">Req. Care Level</span>
+                            <span id="careLevel" class="text-slate-200 font-medium"></span>
+                        </div>
+                        <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-800 sm:col-span-2">
+                            <span class="text-slate-500 block mb-1 uppercase text-xs font-bold">Suspected Trauma/Injuries</span>
+                            <div id="suspectedInjuries" class="flex flex-wrap gap-2 mt-2"></div>
+                        </div>
+                        <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-800 sm:col-span-2">
+                            <span class="text-slate-500 block mb-1 uppercase text-xs font-bold">Scene Safety & Notes</span>
+                            <span id="verificationNotes" class="text-slate-300 italic block mt-1"></span>
+                            <span id="bystanderAdvice" class="text-slate-200 block mt-2"></span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
             
-            <div class="card">
-                <h2>Scene Safety</h2>
-                <p><strong>Bystander Advice:</strong> <span id="bystanderAdvice"></span></p>
+            <!-- Placeholder for right column before submit -->
+            <div id="emptyState" class="hidden lg:flex flex-col items-center justify-center h-full glass-card rounded-xl p-10 text-center opacity-50">
+                <span class="text-6xl mb-4">🚑</span>
+                <h3 class="text-xl font-bold text-slate-300 mb-2">Awaiting Emergency Input</h3>
+                <p class="text-slate-500 max-w-sm">Use the console on the left to submit an emergency via text, audio, or photo. The AI triage results will appear here.</p>
             </div>
-            
-            <button id="resetBtn" type="button" style="margin-top:20px; background-color:#555;">New Triage Case</button>
-        </section>
+
+        </div>
     </main>
 
     <script>
+        // Init state
+        document.getElementById('emptyState').classList.remove('hidden');
+
+        // Scenarios
+        const scenarios = {
+            'crash': "Massive car crash on Hebbal flyover going towards airport. Two cars involved. One driver is unconscious and bleeding heavily from the head, stuck in the seat. The other driver is walking around but holding their arm which looks broken. Traffic is still moving fast next to them.",
+            'fire': "Explosion at a chemical factory in Peenya. Thick yellow smoke everywhere. Three workers are on the ground coughing blood and struggling to breathe. Their skin is red and blistering. Some barrels are still burning.",
+            'cardiac': "My grandfather just collapsed in our living room. He was clutching his chest and sweating, now he's unresponsive. I don't think he is breathing normally, it sounds like gasping. He has a history of heart attacks."
+        };
+
+        function loadDemo(key) {
+            document.getElementById('textInput').value = scenarios[key];
+        }
+
+        // Elements
         const form = document.getElementById('triageForm');
         const textInput = document.getElementById('textInput');
         const photoUpload = document.getElementById('photoUpload');
         const fileNameDisplay = document.getElementById('fileNameDisplay');
         const recordAudioBtn = document.getElementById('recordAudioBtn');
-        const recordingStatus = document.getElementById('recordingStatus');
+        const recordText = document.getElementById('recordText');
         const submitBtn = document.getElementById('submitBtn');
-        const loadingIndicator = document.getElementById('loadingIndicator');
+        const loadingSpinner = document.getElementById('loadingSpinner');
         const resultsArea = document.getElementById('resultsArea');
-        const resetBtn = document.getElementById('resetBtn');
+        const emptyState = document.getElementById('emptyState');
 
         let mediaRecorder;
         let audioChunks = [];
         let recordedAudioBlob = null;
 
-        // File upload handling
+        // Photo Upload UI
         photoUpload.addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
                 fileNameDisplay.textContent = e.target.files[0].name;
-                recordedAudioBlob = null; // Clear recorded audio if file uploaded
-                recordAudioBtn.textContent = '🎙️ Record Audio';
+                fileNameDisplay.classList.add('text-blue-400');
+                recordedAudioBlob = null; 
+                resetMicUI();
             } else {
-                fileNameDisplay.textContent = 'No file selected';
+                fileNameDisplay.textContent = 'Upload Photo';
+                fileNameDisplay.classList.remove('text-blue-400');
             }
         });
 
-        // Audio recording handling
+        // Audio Recording UI
+        function resetMicUI() {
+            recordText.textContent = 'Record Audio';
+            recordAudioBtn.classList.remove('recording-pulse', 'bg-red-900/50', 'text-red-400', 'border-red-500/50');
+        }
+
         recordAudioBtn.addEventListener('click', async () => {
             if (mediaRecorder && mediaRecorder.state === 'recording') {
-                // Stop recording
                 mediaRecorder.stop();
-                recordAudioBtn.textContent = '🎙️ Record Audio';
-                recordAudioBtn.setAttribute('aria-pressed', 'false');
-                recordingStatus.style.display = 'none';
+                resetMicUI();
+                recordText.textContent = 'Voice Memo Ready';
+                recordAudioBtn.classList.add('text-emerald-400');
             } else {
-                // Start recording
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     mediaRecorder = new MediaRecorder(stream);
                     audioChunks = [];
                     
-                    mediaRecorder.ondataavailable = (event) => {
-                        audioChunks.push(event.data);
-                    };
-
+                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
                     mediaRecorder.onstop = () => {
                         recordedAudioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                        fileNameDisplay.textContent = 'Voice Memo Recorded';
-                        photoUpload.value = ''; // Clear file input
-                        stream.getTracks().forEach(track => track.stop()); // Release microphone
+                        photoUpload.value = '';
+                        fileNameDisplay.textContent = 'Upload Photo';
+                        fileNameDisplay.classList.remove('text-blue-400');
+                        stream.getTracks().forEach(track => track.stop());
                     };
 
                     mediaRecorder.start();
-                    recordAudioBtn.textContent = '⏹️ Stop Recording';
-                    recordAudioBtn.setAttribute('aria-pressed', 'true');
-                    recordingStatus.style.display = 'inline-flex';
+                    recordText.textContent = 'Recording... (Tap to Stop)';
+                    recordAudioBtn.classList.remove('text-emerald-400');
+                    recordAudioBtn.classList.add('recording-pulse', 'bg-red-900/50', 'text-red-400', 'border-red-500/50');
                 } catch (err) {
-                    alert('Microphone access denied or unavailable.');
-                    console.error(err);
+                    alert('Microphone access denied.');
                 }
             }
         });
 
+        // Form Submit
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // UI State
-            form.style.display = 'none';
-            resultsArea.style.display = 'none';
-            loadingIndicator.style.display = 'block';
+            // Loading State
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
+            loadingSpinner.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            resultsArea.classList.add('hidden');
 
             const formData = new FormData();
             formData.append('text_input', textInput.value);
@@ -398,76 +298,95 @@
             }
 
             try {
-                const response = await fetch('/triage', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.detail || 'Triage failed');
-                }
-
-                const data = await response.json();
-                displayResults(data);
+                const response = await fetch('/triage', { method: 'POST', body: formData });
+                if (!response.ok) throw new Error((await response.json()).detail || 'Triage failed');
+                displayResults(await response.json());
             } catch (err) {
                 alert('Error processing triage: ' + err.message);
-                form.style.display = 'block';
+                emptyState.classList.remove('hidden');
             } finally {
-                loadingIndicator.style.display = 'none';
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+                loadingSpinner.classList.add('hidden');
             }
         });
 
         function displayResults(data) {
-            resultsArea.style.display = 'block';
+            resultsArea.classList.remove('hidden');
             
-            // Banner
+            // Triage Card Styling
+            const card = document.getElementById('triageCard');
             const banner = document.getElementById('triageBanner');
-            banner.textContent = data.triage_tag;
-            banner.className = 'triage-banner'; // reset
-            if (data.triage_tag.startsWith('RED')) banner.classList.add('triage-RED');
-            else if (data.triage_tag.startsWith('YELLOW')) banner.classList.add('triage-YELLOW');
-            else if (data.triage_tag.startsWith('GREEN')) banner.classList.add('triage-GREEN');
-            else if (data.triage_tag.startsWith('BLACK')) banner.classList.add('triage-BLACK');
-
-            // Badges
-            document.getElementById('confidenceBadge').textContent = `Confidence: ${(data.verification_confidence * 100).toFixed(0)}%`;
-            document.getElementById('hazardBadge').textContent = 
-                data.scene_hazards.active_hazards.length > 0 ? 
-                `Hazards: ${data.scene_hazards.active_hazards.join(', ')}` : 'No Immediate Hazards';
-
-            // Lists
-            document.getElementById('bystanderSteps').innerHTML = data.bystander_actions.immediate_steps.map(step => `<li>${step}</li>`).join('');
-            document.getElementById('criticalWarnings').innerHTML = data.bystander_actions.critical_warnings.map(warning => `<li>${warning}</li>`).join('');
+            const pulse = document.getElementById('triagePulse');
             
-            // Text fields
-            document.getElementById('patientStatus').textContent = data.clinical_summary.patient_status;
-            document.getElementById('suspectedInjuries').textContent = data.clinical_summary.suspected_injuries.join(', ');
-            document.getElementById('verificationNotes').textContent = data.verification_notes;
-            document.getElementById('bystanderAdvice').textContent = data.scene_hazards.bystander_safety_advice;
+            // Reset classes
+            card.className = 'rounded-xl border p-6 shadow-2xl transition-all duration-500';
+            banner.textContent = data.triage_tag.split('-')[0].trim(); // Just the color word or short version
+            
+            if (data.triage_tag.includes('RED')) {
+                card.classList.add('bg-red-950/80', 'border-red-500', 'text-red-100');
+                pulse.classList.add('bg-red-500');
+                banner.textContent = data.triage_tag; // Full text for clarity
+            } else if (data.triage_tag.includes('YELLOW')) {
+                card.classList.add('bg-amber-950/80', 'border-amber-500', 'text-amber-100');
+                pulse.classList.add('bg-amber-500');
+                banner.textContent = data.triage_tag;
+            } else if (data.triage_tag.includes('GREEN')) {
+                card.classList.add('bg-emerald-950/80', 'border-emerald-500', 'text-emerald-100');
+                pulse.classList.add('bg-emerald-500');
+                banner.textContent = data.triage_tag;
+            } else {
+                card.classList.add('bg-slate-900', 'border-slate-500', 'text-slate-300');
+                pulse.classList.add('bg-slate-500');
+                banner.textContent = data.triage_tag;
+            }
 
-            // Google Maps
+            // Confidence & Hazards
+            document.getElementById('confidenceText').textContent = `${(data.verification_confidence * 100).toFixed(0)}% Verified Confidence`;
+            
+            const hazardContainer = document.getElementById('hazardContainer');
+            hazardContainer.innerHTML = '';
+            if (data.scene_hazards.active_hazards.length === 0) {
+                hazardContainer.innerHTML = `<span class="px-3 py-1 bg-black/20 rounded-full text-xs font-bold border border-white/10 opacity-70">No immediate hazards detected</span>`;
+            } else {
+                data.scene_hazards.active_hazards.forEach(h => {
+                    hazardContainer.innerHTML += `<span class="px-3 py-1 bg-orange-600/30 text-orange-200 rounded-full text-xs font-bold border border-orange-500/50 uppercase tracking-wide">⚠️ ${h}</span>`;
+                });
+            }
+
+            // Bystander Steps (Numbered Cards)
+            const stepsContainer = document.getElementById('bystanderSteps');
+            stepsContainer.innerHTML = data.bystander_actions.immediate_steps.map((step, idx) => `
+                <div class="flex items-start gap-4 bg-slate-900/60 p-4 rounded-lg border border-slate-700/50">
+                    <div class="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 font-bold flex items-center justify-center border border-blue-500/30">
+                        ${idx + 1}
+                    </div>
+                    <p class="text-slate-200 mt-1">${step}</p>
+                </div>
+            `).join('');
+
+            // Critical Warnings
+            document.getElementById('criticalWarnings').innerHTML = data.bystander_actions.critical_warnings.map(w => `<li>${w}</li>`).join('');
+
+            // Clinical Telemetry
+            document.getElementById('patientStatus').textContent = data.clinical_summary.patient_status;
+            document.getElementById('careLevel').textContent = data.clinical_summary.recommended_trauma_level;
+            
+            const injuriesContainer = document.getElementById('suspectedInjuries');
+            injuriesContainer.innerHTML = data.clinical_summary.suspected_injuries.map(i => `<span class="px-2 py-1 bg-slate-800 text-slate-300 text-xs rounded border border-slate-700">${i}</span>`).join('');
+            
+            document.getElementById('verificationNotes').textContent = "Note: " + data.verification_notes;
+            document.getElementById('bystanderAdvice').textContent = "Scene Safety: " + data.scene_hazards.bystander_safety_advice;
+
+            // Maps Button
             const mapsBtn = document.getElementById('mapsButton');
             if (data.google_maps_emergency_url) {
                 mapsBtn.href = data.google_maps_emergency_url;
-                mapsBtn.style.display = 'block';
+                mapsBtn.classList.remove('hidden');
             } else {
-                mapsBtn.style.display = 'none';
+                mapsBtn.classList.add('hidden');
             }
-            
-            // Announce to screen reader
-            banner.focus();
         }
-        
-        resetBtn.addEventListener('click', () => {
-            textInput.value = '';
-            photoUpload.value = '';
-            fileNameDisplay.textContent = 'No file selected';
-            recordedAudioBlob = null;
-            form.style.display = 'block';
-            resultsArea.style.display = 'none';
-            textInput.focus();
-        });
     </script>
 </body>
 </html>
